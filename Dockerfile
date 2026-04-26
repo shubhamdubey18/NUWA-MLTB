@@ -1,11 +1,14 @@
 FROM 5hojib/aeon:latest
 
-WORKDIR /usr/src/app
-RUN chmod 777 /usr/src/app
+WORKDIR /app
+RUN chmod 777 /app
 
 RUN uv venv
 COPY requirements.txt .
 RUN uv pip install --no-cache-dir -r requirements.txt
 
 COPY . .
+
+RUN sed -i 's/\r$//' *.sh
+
 CMD ["bash", "start.sh"]
