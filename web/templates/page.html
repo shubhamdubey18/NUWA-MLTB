@@ -4,74 +4,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Torrent Selector</title>
+    <title>Clyfly Bot - Torrent Selector</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             transition: background-color 0.5s, color 0.5s;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a3e 50%, #0f1729 100%);
+            color: #f5f5f7;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
         }
 
         .dark {
-            background-color: hsl(224 71% 4%);
-            color: hsl(213 31% 91%);
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a3e 50%, #0f1729 100%);
+            color: #f5f5f7;
         }
 
         .light {
-            background-color: hsl(0 0% 100%);
-            color: hsl(224 71% 4%);
+            background-color: #f5f5f7;
+            color: #1d1d1f;
         }
 
         .card {
-            background-color: hsl(224 71% 4%);
-            border-radius: 0.5rem;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
         }
 
         .dark .card {
-            background-color: hsl(224 71% 8%);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
         .light .card {
-            background-color: hsl(0 0% 100%);
-            color: hsl(224 71% 4%);
+            background: rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            color: #1d1d1f;
         }
 
         .btn {
-            padding: 0.5rem 1rem;
-            border-radius: 0.375rem;
-            font-weight: 500;
+            padding: 0.75rem 1.5rem;
+            border-radius: 1rem;
+            font-weight: 600;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
-            transition: all 0.2s;
+            justify-content: center;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 0.95rem;
+            letter-spacing: 0.3px;
         }
 
         .btn:hover {
-            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active {
+            transform: translateY(0px);
         }
 
         .btn-primary {
-            background-color: hsl(217.2 91.2% 59.8%);
-            color: hsl(0 0% 100%);
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5);
+            background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
         }
 
         .btn-secondary {
-            background-color: hsl(215 20.2% 65.1%);
-            color: hsl(0 0% 100%);
+            background: rgba(255, 255, 255, 0.15);
+            color: #f5f5f7;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.3);
         }
 
         .switch {
             position: relative;
             display: inline-block;
-            width: 60px;
-            height: 34px;
+            width: 56px;
+            height: 32px;
         }
 
         .switch input {
@@ -87,55 +142,63 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: hsl(215 20.2% 65.1%);
-            transition: .4s;
-            border-radius: 34px;
+            background: rgba(255, 255, 255, 0.15);
+            transition: 0.4s;
+            border-radius: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .slider:before {
             position: absolute;
             content: "";
-            height: 26px;
-            width: 26px;
+            height: 24px;
+            width: 24px;
             left: 4px;
             bottom: 4px;
             background-color: white;
-            transition: .4s;
+            transition: 0.4s;
             border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
         input:checked+.slider {
-            background-color: hsl(217.2 91.2% 59.8%);
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-color: rgba(99, 102, 241, 0.5);
         }
 
         input:checked+.slider:before {
-            transform: translateX(26px);
+            transform: translateX(24px);
         }
 
         .file-tree-item {
             display: flex;
             align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid hsla(0, 0%, 100%, 0.1);
-            transition: background-color 0.3s ease;
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.2s ease;
+            border-radius: 0.75rem;
+            margin-bottom: 4px;
         }
 
         .file-tree-item:hover {
-            background-color: hsla(0, 0%, 100%, 0.1);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.12);
         }
 
         .dark .file-tree-item:hover {
-            background-color: hsla(0, 0%, 0%, 0.1);
+            background: rgba(255, 255, 255, 0.08);
         }
 
         .icon {
-            margin-right: 8px;
-            font-size: 1.2em;
+            margin-right: 12px;
+            font-size: 1.3em;
+            flex-shrink: 0;
         }
 
         .folder {
             cursor: pointer;
             font-weight: 600;
+            color: #6366f1;
         }
 
         .modal {
@@ -146,32 +209,56 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.3s ease;
         }
 
         .modal-content {
-            background-color: hsl(0 0% 100%);
-            color: hsl(224 71% 4%);
-            margin: 15% auto;
-            padding: 20px;
-            border-radius: 5px;
+            background: rgba(15, 23, 41, 0.95);
+            backdrop-filter: blur(20px);
+            color: #f5f5f7;
+            margin: 50% auto;
+            transform: translateY(-50%);
+            padding: 2rem;
+            border-radius: 2rem;
             width: 90%;
             max-width: 500px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
         }
 
         .dark .modal-content {
-            background-color: hsl(224 71% 4%);
-            color: hsl(213 31% 91%);
+            background: rgba(15, 23, 41, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .light .modal-content {
+            background: rgba(245, 245, 247, 0.95);
+            color: #1d1d1f;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(-50%);
+            }
         }
 
         @keyframes day-night {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .day-night-animation {
@@ -179,19 +266,23 @@
         }
 
         .edit-name-input {
-            background-color: transparent;
-            border: none;
-            border-bottom: 1px solid hsl(217.2 91.2% 59.8%);
-            color: inherit;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0.75rem;
+            color: #f5f5f7;
             font-size: inherit;
-            padding: 2px 4px;
+            padding: 0.75rem 1rem;
             margin-right: 8px;
             width: 100%;
+            font-family: inherit;
+            transition: all 0.3s ease;
         }
 
         .edit-name-input:focus {
             outline: none;
-            border-bottom: 2px solid hsl(217.2 91.2% 59.8%);
+            border: 1px solid rgba(99, 102, 241, 0.5);
+            background: rgba(99, 102, 241, 0.1);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
 
         .pin-entry {
@@ -199,13 +290,8 @@
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .pin-entry.fadeOut {
@@ -213,72 +299,107 @@
         }
 
         @keyframes fadeOut {
-            from {
-                opacity: 1;
-            }
-
-            to {
-                opacity: 0;
-            }
+            from { opacity: 1; }
+            to { opacity: 0; }
         }
 
         .size-info {
-            font-size: 0.8em;
-            color: hsl(215 20.2% 65.1%);
+            font-size: 0.85em;
+            color: #a0aec0;
+            font-weight: 500;
         }
 
         .dark .size-info {
-            color: hsl(213 31% 80%);
+            color: #a0aec0;
         }
 
         .light input[type="text"],
         .light input[type="password"] {
-            background-color: hsl(0 0% 95%);
-            color: hsl(224 71% 4%);
+            background: rgba(0, 0, 0, 0.05);
+            color: #1d1d1f;
+            border: 1px solid rgba(0, 0, 0, 0.1);
         }
 
         header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 2rem 0;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background: rgba(15, 23, 41, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.5rem 0;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 10;
         }
 
         footer {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: rgba(15, 23, 41, 0.8);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
             padding: 2rem 0;
-            box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.1);
             margin-top: auto;
+            position: relative;
+            z-index: 10;
         }
 
         .social-button {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
             color: white;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
         .social-button:hover {
-            background-color: rgba(255, 255, 255, 0.3);
-            transform: scale(1.1);
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-color: rgba(99, 102, 241, 0.5);
+            transform: scale(1.1) translateY(-2px);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+        }
+
+        .brand-logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .edit-buttons {
             display: flex;
-            gap: 4px;
+            gap: 8px;
         }
 
         .edit-buttons button {
-            padding: 2px 4px;
+            padding: 6px 12px;
             font-size: 0.8em;
         }
 
         @media (max-width: 640px) {
+            .card {
+                border-radius: 1.5rem;
+            }
+
+            .btn {
+                padding: 0.65rem 1.25rem;
+                font-size: 0.9rem;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 1.5rem;
+            }
+
             .footer-content {
                 flex-direction: column-reverse;
                 align-items: center;
@@ -290,18 +411,40 @@
 
             .file-tree-item .file-name,
             .file-tree-item .folder-name {
-                font-size: 0.9em;
+                font-size: 0.95em;
+            }
+
+            header {
+                padding: 1rem 0;
+            }
+
+            .brand-logo {
+                font-size: 1.4rem;
             }
         }
 
         #pinEntry {
-            max-width: 300px;
+            max-width: 380px;
             margin: 0 auto;
         }
 
-        #pinEntry input[type="password"] {
+        #pinEntry input[type="text"] {
             width: 100%;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 1rem;
+            color: #f5f5f7;
+            padding: 0.875rem 1rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        #pinEntry input[type="text"]:focus {
+            outline: none;
+            background: rgba(99, 102, 241, 0.1);
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
 
         #pinEntry button {
@@ -326,13 +469,16 @@
             border: none;
             cursor: pointer;
             font-size: 0.9em;
-            color: inherit;
+            color: #6366f1;
             padding: 0;
-            margin-left: 8px;
+            margin-left: 12px;
+            transition: all 0.2s ease;
+            font-weight: 600;
         }
 
         .edit-btn:hover {
-            text-decoration: underline;
+            color: #8b5cf6;
+            transform: scale(1.05);
         }
 
         .checkbox-wrapper {
@@ -342,10 +488,62 @@
             width: 40px;
         }
 
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #6366f1;
+        }
+
         .file-name {
             word-break: break-word;
             max-width: 100%;
             overflow-wrap: break-word;
+            color: #f5f5f7;
+            font-weight: 500;
+        }
+
+        main {
+            position: relative;
+            z-index: 1;
+        }
+
+        .stats-box {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.25rem;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stats-box p {
+            margin: 0.5rem 0;
+            font-size: 0.95rem;
+            letter-spacing: 0.2px;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .button-group-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .button-group-item .btn {
+            width: 100%;
+        }
+
+        .button-group-item span {
+            font-size: 0.75rem;
+            color: #a0aec0;
+            font-weight: 500;
         }
     </style>
 </head>
@@ -354,11 +552,13 @@
     <header>
         <div class="container mx-auto px-4">
             <div class="flex flex-col sm:flex-row justify-between items-center">
-                <h1 class="text-3xl font-bold text-white mb-4 sm:mb-0">🗂 Torrent
-                    File Selector</h1>
+                <div class="brand-logo">
+                    <span>⚡</span>
+                    <span>Clyfly Bot</span>
+                </div>
                 <div class="flex items-center space-x-4">
                     <div class="flex items-center">
-                        <span id="themeIcon" class="mr-2 text-white">🌙</span>
+                        <span id="themeIcon" class="mr-3 text-2xl">🌙</span>
                         <label class="switch">
                             <input type="checkbox" id="themeToggle" checked>
                             <span class="slider"></span>
@@ -370,34 +570,41 @@
     </header>
 
     <main class="flex-grow container mx-auto p-4">
-        <div id="pinEntry" class="card p-6 mb-4 pin-entry">
-            <h2 class="text-xl font-bold mb-4">Enter PIN</h2>
+        <div id="pinEntry" class="card p-8 mb-6 pin-entry">
+            <h2 class="text-2xl font-bold mb-2 text-center">Welcome to Clyfly Bot</h2>
+            <p class="text-center text-sm text-gray-400 mb-6">Enter your PIN to access torrent files</p>
             <input type="text" id="pinInput"
-                title="Enter the code that you have got from Telegram to access the Torrent"
-                class="bg-gray-700 text-white p-2 rounded mb-4 w-full" placeholder="Enter PIN">
-            <button id="submitPin" class="btn btn-primary">Submit</button>
+                title="Enter the PIN code from Telegram to access torrent files"
+                class="mb-6" placeholder="Enter PIN">
+            <button id="submitPin" class="btn btn-primary w-full">Submit</button>
         </div>
 
-        <div id="fileManager" class="card p-6 hidden">
-            <div class="flex flex-wrap justify-between items-start mb-4">
-                <div class="flex flex-col items-center mr-2 mb-2">
+        <div id="fileManager" class="card p-8 hidden">
+            <h2 class="text-2xl font-bold mb-6">Select Files</h2>
+            <div class="button-group">
+                <div class="button-group-item">
                     <button id="selectAllBtn" class="btn btn-primary">Select All</button>
-                    <span class="text-xs mt-1">in this folder</span>
+                    <span>in this folder</span>
                 </div>
-                <div class="flex flex-col items-center mr-2 mb-2">
-                    <button id="invertSelectionBtn" class="btn btn-primary">Invert Selection</button>
-                    <span class="text-xs mt-1">in this folder</span>
+                <div class="button-group-item">
+                    <button id="invertSelectionBtn" class="btn btn-primary">Invert</button>
+                    <span>in this folder</span>
                 </div>
-                <div class="flex flex-col items-center mr-2 mb-2">
-                    <button id="selectEverythingBtn" class="btn btn-primary">Select Everything</button>
-                    <span class="text-xs mt-1">all files</span>
+                <div class="button-group-item">
+                    <button id="selectEverythingBtn" class="btn btn-primary">Select All</button>
+                    <span>all files</span>
                 </div>
-                <button id="submitBtn" class="btn btn-primary mb-2">Submit</button>
+                <div class="button-group-item">
+                    <button id="submitBtn" class="btn btn-primary">Submit</button>
+                    <span>selection</span>
+                </div>
             </div>
-            <div class="mb-4">
-                <p>Selected files: <span id="selectedCount">0</span> / <span id="totalCount">0</span></p>
-                <p>Total size: <span id="selectedSize">0 B</span> / <span id="totalSize">0 B</span></p>
+
+            <div class="stats-box">
+                <p><span class="font-semibold">Selected files:</span> <span id="selectedCount">0</span> / <span id="totalCount">0</span></p>
+                <p><span class="font-semibold">Total size:</span> <span id="selectedSize">0 B</span> / <span id="totalSize">0 B</span></p>
             </div>
+
             <div id="fileTree" class="mb-4"></div>
         </div>
     </main>
@@ -405,14 +612,13 @@
     <footer>
         <div class="container mx-auto px-4">
             <div class="footer-content flex flex-col sm:flex-row justify-between items-center">
-                <p class="text-white mb-4 sm:mb-0">&copy; 2024 Torrent File Selector.
-                    All rights reserved.</p>
-                <div class="footer-buttons flex space-x-4">
+                <p class="text-center sm:text-left mb-4 sm:mb-0 text-sm">&copy; 2024-2025 Clyfly Bot. All rights reserved.</p>
+                <div class="footer-buttons flex space-x-3">
                     <a href="https://github.com/anasty17/mirror-leech-telegram-bot" target="_blank"
-                        class="social-button">
+                        class="social-button" title="GitHub">
                         <i class="fab fa-github"></i>
                     </a>
-                    <a href="https://www.instagram.com" target="_blank" class="social-button">
+                    <a href="https://www.instagram.com" target="_blank" class="social-button" title="Instagram">
                         <i class="fab fa-instagram"></i>
                     </a>
                 </div>
@@ -422,9 +628,9 @@
 
     <div id="reusableModal" class="modal">
         <div class="modal-content">
-            <h2 id="modalTitle" class="text-xl font-bold mb-4"></h2>
-            <div id="modalBody"></div>
-            <div id="modalFooter" class="mt-4"></div>
+            <h2 id="modalTitle" class="text-2xl font-bold mb-4"></h2>
+            <div id="modalBody" class="mb-6 text-sm"></div>
+            <div id="modalFooter" class="flex gap-3 justify-end"></div>
         </div>
     </div>
 
@@ -509,7 +715,7 @@
             if (currentFolder) {
                 const backButton = document.createElement('div');
                 backButton.className = 'file-tree-item folder';
-                backButton.innerHTML = '<span class="icon">📁</span>...';
+                backButton.innerHTML = '<span class="icon">📁</span><span>Back</span>';
                 backButton.addEventListener('click', goBack);
                 fileTree.appendChild(backButton);
             }
@@ -547,13 +753,13 @@
                     sizeInfo.textContent = `${formatSize(size)}`;
                     if (allowEdit) {
                         const editBtn = document.createElement('span');
-                        editBtn.textContent = ' | Edit ✏️';
+                        editBtn.textContent = ' ✏️ Edit';
                         editBtn.className = 'edit-btn';
                         sizeInfo.appendChild(editBtn);
                     }
                     if (node.progress !== undefined) {
                         const progressText = document.createElement('span');
-                        progressText.textContent = ` | Progress: ${node.progress}%`;
+                        progressText.textContent = ` • ${node.progress}%`;
                         sizeInfo.appendChild(progressText);
                     }
                 }
@@ -585,7 +791,7 @@
                     }
                     if (allowEdit) {
                         const editBtn = document.createElement('span');
-                        editBtn.textContent = ' | Edit ✏️';
+                        editBtn.textContent = ' ✏️ Edit';
                         editBtn.className = 'edit-btn';
                         sizeInfo.appendChild(editBtn);
                     }
@@ -782,8 +988,8 @@
                 <input type="text" id="editNameInput" class="edit-name-input" value="${node.name}">
             `;
             modalFooter.innerHTML = `
-                <button id="saveNameBtn" class="btn btn-primary">Save</button>
                 <button class="btn btn-secondary" onClick="closeModal()">Cancel</button>
+                <button id="saveNameBtn" class="btn btn-primary">Save</button>
             `;
 
             const saveNameBtn = document.getElementById('saveNameBtn');
@@ -805,13 +1011,13 @@
                         'body': JSON.stringify(body),
                     }).then(response => {
                         if (response.ok) {
-                            modalTitle.textContent = 'Success!';
-                            modalBody.innerHTML = '<p>Your Rename has been submitted successfully.</p>';
+                            modalTitle.textContent = '✅ Success!';
+                            modalBody.innerHTML = '<p>Your rename has been submitted successfully.</p>';
                             node.name = newName;
                             renderFileTree(currentFolder ? currentFolder.children : files);
                         } else {
-                            modalTitle.textContent = 'Error';
-                            modalBody.innerHTML = '<p>There was an error submitting your Rename. Try Again!.</p>';
+                            modalTitle.textContent = '❌ Error';
+                            modalBody.innerHTML = '<p>There was an error submitting your rename. Please try again.</p>';
                         }
                         modalFooter.innerHTML = '<button class="btn btn-primary" onclick="closeModal()">Okay</button>';
                         openModal();
@@ -831,7 +1037,9 @@
         }
 
         function openModal() {
-            reusableModal.style.display = 'block';
+            reusableModal.style.display = 'flex';
+            reusableModal.style.alignItems = 'center';
+            reusableModal.style.justifyContent = 'center';
         }
 
         function closeModal() {
@@ -840,51 +1048,51 @@
 
         function submitData() {
             if (parseInt(selectedCount.innerText) === 0) {
-                modalTitle.textContent = 'Error';
-                modalBody.innerHTML = '<p>No files selected.</p>';
+                modalTitle.textContent = '⚠️ No Files Selected';
+                modalBody.innerHTML = '<p>Please select at least one file to proceed.</p>';
                 modalFooter.innerHTML = '<button class="btn btn-primary" onclick="closeModal()">Okay</button>';
                 openModal();
                 return;
             }
-            modalTitle.textContent = 'Processing...';
-            modalBody.innerHTML = `<p>Submitting, ${selectedCount.innerText} file(s)... </p>`;
+            modalTitle.textContent = '⏳ Processing...';
+            modalBody.innerHTML = `<p>Submitting <strong>${selectedCount.innerText}</strong> file(s)...</p>`;
             modalFooter.innerHTML = '';
             openModal();
             const requestUrl = `/app/files/torrent?gid=${urlParams.gid}&pin=${pinInput.value}&mode=selection`;
             fetch(requestUrl, { 'method': 'POST', 'body': JSON.stringify(files) }).then(response => {
-                if (reusableModal.style.display === 'block') {
+                if (reusableModal.style.display !== 'none') {
                     closeModal();
                 }
                 if (response.ok) {
-                    modalTitle.textContent = 'Success!';
+                    modalTitle.textContent = '✅ Success!';
                     modalBody.innerHTML = '<p>Your selection has been submitted successfully.</p>';
                 } else {
-                    modalTitle.textContent = 'Error';
-                    modalBody.innerHTML = '<p>An error occurred while submitting your selection. Try Again!</p>';
+                    modalTitle.textContent = '❌ Error';
+                    modalBody.innerHTML = '<p>An error occurred while submitting your selection. Please try again.</p>';
                 }
                 modalFooter.innerHTML = '<button class="btn btn-primary" onclick="closeModal()">Okay</button>';
                 openModal();
             });
         }
 
-
-        pinInput.addEventListener('keypress', ('keypress', (e) => {
+        pinInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 submitPin.click();
             }
-        }));
+        });
+
         submitPin.addEventListener('click', () => {
             pinInput.blur();
             if (pinInput.value === '') {
-                modalTitle.textContent = 'Missing Pin';
-                modalBody.innerHTML = `<p>The pin is missing.</p>`;
+                modalTitle.textContent = '⚠️ Missing PIN';
+                modalBody.innerHTML = `<p>Please enter your PIN to continue.</p>`;
                 modalFooter.innerHTML = '<button class="btn btn-primary" onClick="closeModal()">Try Again</button>';
                 openModal();
                 return false;
             }
             if (urlParams.gid == null || urlParams.gid === '') {
-                modalTitle.textContent = 'Missing parameter';
-                modalBody.innerHTML = `<p>The parameter gid is missing.</p>`;
+                modalTitle.textContent = '⚠️ Missing Parameter';
+                modalBody.innerHTML = `<p>The parameter <strong>gid</strong> is missing.</p>`;
                 modalFooter.innerHTML = '<button class="btn btn-primary" onClick="closeModal()">Try Again</button>';
                 openModal();
                 return false;
@@ -894,8 +1102,8 @@
                 if (response.ok) {
                     return response.json().then(data => {
                         if (data.error) {
-                            modalTitle.textContent = data.error;
-                            modalBody.innerHTML = `<p>${data.message}. Try Again!</p>`;
+                            modalTitle.textContent = '❌ ' + data.error;
+                            modalBody.innerHTML = `<p>${data.message}. Please try again.</p>`;
                             modalFooter.innerHTML = '<button class="btn btn-primary" onclick="closeModal()">Retry</button>';
                             openModal();
                         } else {
@@ -913,18 +1121,19 @@
                         }
                     });
                 } else {
-                    modalTitle.textContent = 'Something Went Wrong!';
+                    modalTitle.textContent = '❌ Connection Error';
                     modalBody.innerHTML = '<p>Check console. Status Code: ' + response.status + '</p>';
                     modalFooter.innerHTML = '<button class="btn btn-primary" onclick="closeModal()">Retry</button>';
                     openModal();
                 }
             }).catch(error => {
-                modalTitle.textContent = 'Server Error';
-                modalBody.innerHTML = '<p>There was an error connecting to the server. Try Again!</p><br>' + error.message;
+                modalTitle.textContent = '❌ Server Error';
+                modalBody.innerHTML = '<p>There was an error connecting to the server.</p><p style="font-size: 0.85rem; margin-top: 0.5rem; opacity: 0.8;">' + error.message + '</p>';
                 modalFooter.innerHTML = '<button class="btn btn-primary" onclick="closeModal()">Retry</button>';
                 openModal();
             });
         });
+
         themeToggle.addEventListener('change', toggleTheme);
         const invertSelectionBtn = document.getElementById('invertSelectionBtn');
         const selectEverythingBtn = document.getElementById('selectEverythingBtn');
@@ -938,7 +1147,7 @@
 
         reusableModal.addEventListener('click', (event) => {
             if (event.target === reusableModal) {
-                event.stopPropagation();
+                closeModal();
             }
         });
 
@@ -949,8 +1158,8 @@
         }
 
         function updateSelectEverythingButtonText() {
-            const allSelected = selectedCount === totalCount;
-            selectEverythingBtn.textContent = allSelected ? 'Deselect Everything' : 'Select Everything';
+            const allSelected = selectedCount.innerText === totalCount.innerText && parseInt(totalCount.innerText) > 0;
+            selectEverythingBtn.textContent = allSelected ? 'Deselect All' : 'Select All';
         }
 
         loadThemePreference();
