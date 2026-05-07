@@ -6,7 +6,7 @@ on:
 
       # ── Heroku ──────────────────────────────────────────────────────────────
       HEROKU_APP_NAME:
-        description: "Heroku App name (must already exist or will be created)"
+        description: "Heroku App name (created automatically if it doesn't exist)"
         required: true
       HEROKU_API_KEY:
         description: "Heroku API key (Dashboard → Account → API Key)"
@@ -44,7 +44,7 @@ on:
 
       # ── Upstream ─────────────────────────────────────────────────────────────
       UPSTREAM_REPO:
-        description: "Upstream repo URL (leave default to use this repo)"
+        description: "Upstream repo URL"
         required: false
         default: "https://github.com/shubhamdubey18/NUWA-MLTB"
       UPSTREAM_BRANCH:
@@ -103,6 +103,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      HEROKU_API_KEY: ${{ inputs.HEROKU_API_KEY }}
 
     steps:
       - name: Checkout Repository
@@ -111,41 +113,76 @@ jobs:
       - name: Remove deployment-only files
         run: |
           for file in README.md nuwa_hk_deploy.ipynb; do
-            [ -f "$file" ] && echo "Removing $file" && rm -f "$file" || echo "Skipping $file (not found)"
+            [ -f "$file" ] && echo "Removing $file" && rm -f "$file" || true
           done
 
       - name: Install Heroku CLI
         run: curl https://cli-assets.heroku.com/install.sh | sh
 
-      - name: Deploy to Heroku (Docker)
-        uses: akhileshns/heroku-deploy@v3.13.15
-        with:
-          heroku_api_key: ${{ inputs.HEROKU_API_KEY }}
-          heroku_app_name: ${{ inputs.HEROKU_APP_NAME }}
-          heroku_email: ${{ inputs.HEROKU_EMAIL }}
-          team: ${{ inputs.HEROKU_TEAM_NAME != '' && format('{0}', inputs.HEROKU_TEAM_NAME) || '' }}
-          usedocker: true
-          docker_heroku_process_type: web
-          stack: "container"
-        env:
-          HD_BOT_TOKEN: ${{ inputs.BOT_TOKEN }}
-          HD_OWNER_ID: ${{ inputs.OWNER_ID }}
-          HD_TELEGRAM_API: ${{ inputs.TELEGRAM_API }}
-          HD_TELEGRAM_HASH: ${{ inputs.TELEGRAM_HASH }}
-          HD_DATABASE_URL: ${{ inputs.DATABASE_URL }}
-          HD_BASE_URL: ${{ inputs.BASE_URL }}
-          HD_BASE_URL_PORT: ${{ inputs.BASE_URL_PORT }}
-          HD_UPSTREAM_REPO: ${{ inputs.UPSTREAM_REPO }}
-          HD_UPSTREAM_BRANCH: ${{ inputs.UPSTREAM_BRANCH }}
-          HD_AUTHORIZED_CHATS: ${{ inputs.AUTHORIZED_CHATS }}
-          HD_SUDO_USERS: ${{ inputs.SUDO_USERS }}
-          HD_USER_SESSION_STRING: ${{ inputs.USER_SESSION_STRING }}
-          HD_CMD_SUFFIX: ${{ inputs.CMD_SUFFIX }}
-          HD_DEFAULT_UPLOAD: ${{ inputs.DEFAULT_UPLOAD }}
-          HD_GDRIVE_ID: ${{ inputs.GDRIVE_ID }}
-          HD_INDEX_URL: ${{ inputs.INDEX_URL }}
-          HD_RCLONE_PATH: ${{ inputs.RCLONE_PATH }}
-          HD_LEECH_SPLIT_SIZE: ${{ inputs.LEECH_SPLIT_SIZE }}
-          HD_LEECH_DUMP_CHAT: ${{ inputs.LEECH_DUMP_CHAT }}
-          HD_FILELION_API: ${{ inputs.FILELION_API }}
-          HD_STREAMWISH_API: ${{ inputs.STREAMWISH_API }}
+      - name: Authenticate Heroku
+        run: |
+          cat > ~/.netrc << EOF
+          machine api.heroku.com
+            login ${{ inputs.HEROKU_EMAIL }}
+            password ${{ inputs.HEROKU_API_KEY }}
+          machine git.heroku.com
+            login ${{ inputs.HEROKU_EMAIL }}
+            password ${{ inputs.HEROKU_API_KEY }}
+          EOF
+          chmod 600 ~/.netrc
+          heroku auth:whoami
+
+      - name: Create App & Set Container Stack
+        run: |
+          APP="${{ inputs.HEROKU_APP_NAME }}"
+          TEAM="${{ inputs.HEROKU_TEAM_NAME }}"
+          if [ -n "$TEAM" ]; then
+            heroku apps:create "$APP" --team "$TEAM" --region us || echo "App already exists"
+          else
+            heroku apps:create "$APP" --region us || echo "App already exists"
+          fi
+          heroku stack:set container --app "$APP"
+
+      - name: Set Config Vars
+        run: |
+          APP="${{ inputs.HEROKU_APP_NAME }}"
+          heroku config:set \
+            BOT_TOKEN="${{ inputs.BOT_TOKEN }}" \
+            OWNER_ID="${{ inputs.OWNER_ID }}" \
+            TELEGRAM_API="${{ inputs.TELEGRAM_API }}" \
+            TELEGRAM_HASH="${{ inputs.TELEGRAM_HASH }}" \
+            DATABASE_URL="${{ inputs.DATABASE_URL }}" \
+            BASE_URL="${{ inputs.BASE_URL }}" \
+            BASE_URL_PORT="${{ inputs.BASE_URL_PORT }}" \
+            UPSTREAM_REPO="${{ inputs.UPSTREAM_REPO }}" \
+            UPSTREAM_BRANCH="${{ inputs.UPSTREAM_BRANCH }}" \
+            DEFAULT_UPLOAD="${{ inputs.DEFAULT_UPLOAD }}" \
+            LEECH_SPLIT_SIZE="${{ inputs.LEECH_SPLIT_SIZE }}" \
+            --app "$APP"
+          # set optional vars only if provided
+          [ -n "${{ inputs.AUTHORIZED_CHATS }}" ]    && heroku config:set AUTHORIZED_CHATS="${{ inputs.AUTHORIZED_CHATS }}" --app "$APP"
+          [ -n "${{ inputs.SUDO_USERS }}" ]          && heroku config:set SUDO_USERS="${{ inputs.SUDO_USERS }}" --app "$APP"
+          [ -n "${{ inputs.USER_SESSION_STRING }}" ] && heroku config:set USER_SESSION_STRING="${{ inputs.USER_SESSION_STRING }}" --app "$APP"
+          [ -n "${{ inputs.CMD_SUFFIX }}" ]          && heroku config:set CMD_SUFFIX="${{ inputs.CMD_SUFFIX }}" --app "$APP"
+          [ -n "${{ inputs.GDRIVE_ID }}" ]           && heroku config:set GDRIVE_ID="${{ inputs.GDRIVE_ID }}" --app "$APP"
+          [ -n "${{ inputs.INDEX_URL }}" ]           && heroku config:set INDEX_URL="${{ inputs.INDEX_URL }}" --app "$APP"
+          [ -n "${{ inputs.RCLONE_PATH }}" ]         && heroku config:set RCLONE_PATH="${{ inputs.RCLONE_PATH }}" --app "$APP"
+          [ -n "${{ inputs.LEECH_DUMP_CHAT }}" ]     && heroku config:set LEECH_DUMP_CHAT="${{ inputs.LEECH_DUMP_CHAT }}" --app "$APP"
+          [ -n "${{ inputs.FILELION_API }}" ]        && heroku config:set FILELION_API="${{ inputs.FILELION_API }}" --app "$APP"
+          [ -n "${{ inputs.STREAMWISH_API }}" ]      && heroku config:set STREAMWISH_API="${{ inputs.STREAMWISH_API }}" --app "$APP"
+
+      - name: Login to Heroku Container Registry
+        run: heroku container:login
+
+      - name: Build & Push Docker Image
+        run: heroku container:push web --app "${{ inputs.HEROKU_APP_NAME }}"
+
+      - name: Release Container
+        run: heroku container:release web --app "${{ inputs.HEROKU_APP_NAME }}"
+
+      - name: Deployment Summary
+        run: |
+          APP="${{ inputs.HEROKU_APP_NAME }}"
+          echo "✅ Deployment complete!"
+          echo "🔗 App URL : https://${APP}.herokuapp.com"
+          echo "📊 Dashboard: https://dashboard.heroku.com/apps/${APP}"
