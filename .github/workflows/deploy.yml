@@ -160,16 +160,16 @@ jobs:
             LEECH_SPLIT_SIZE="${{ inputs.LEECH_SPLIT_SIZE }}" \
             --app "$APP"
           # set optional vars only if provided
-          [ -n "${{ inputs.AUTHORIZED_CHATS }}" ]    && heroku config:set AUTHORIZED_CHATS="${{ inputs.AUTHORIZED_CHATS }}" --app "$APP"
-          [ -n "${{ inputs.SUDO_USERS }}" ]          && heroku config:set SUDO_USERS="${{ inputs.SUDO_USERS }}" --app "$APP"
-          [ -n "${{ inputs.USER_SESSION_STRING }}" ] && heroku config:set USER_SESSION_STRING="${{ inputs.USER_SESSION_STRING }}" --app "$APP"
-          [ -n "${{ inputs.CMD_SUFFIX }}" ]          && heroku config:set CMD_SUFFIX="${{ inputs.CMD_SUFFIX }}" --app "$APP"
-          [ -n "${{ inputs.GDRIVE_ID }}" ]           && heroku config:set GDRIVE_ID="${{ inputs.GDRIVE_ID }}" --app "$APP"
-          [ -n "${{ inputs.INDEX_URL }}" ]           && heroku config:set INDEX_URL="${{ inputs.INDEX_URL }}" --app "$APP"
-          [ -n "${{ inputs.RCLONE_PATH }}" ]         && heroku config:set RCLONE_PATH="${{ inputs.RCLONE_PATH }}" --app "$APP"
-          [ -n "${{ inputs.LEECH_DUMP_CHAT }}" ]     && heroku config:set LEECH_DUMP_CHAT="${{ inputs.LEECH_DUMP_CHAT }}" --app "$APP"
-          [ -n "${{ inputs.FILELION_API }}" ]        && heroku config:set FILELION_API="${{ inputs.FILELION_API }}" --app "$APP"
-          [ -n "${{ inputs.STREAMWISH_API }}" ]      && heroku config:set STREAMWISH_API="${{ inputs.STREAMWISH_API }}" --app "$APP"
+          [ -n "${{ inputs.AUTHORIZED_CHATS }}" ]    && heroku config:set AUTHORIZED_CHATS="${{ inputs.AUTHORIZED_CHATS }}" --app "$APP" || true
+          [ -n "${{ inputs.SUDO_USERS }}" ]          && heroku config:set SUDO_USERS="${{ inputs.SUDO_USERS }}" --app "$APP" || true
+          [ -n "${{ inputs.USER_SESSION_STRING }}" ] && heroku config:set USER_SESSION_STRING="${{ inputs.USER_SESSION_STRING }}" --app "$APP" || true
+          [ -n "${{ inputs.CMD_SUFFIX }}" ]          && heroku config:set CMD_SUFFIX="${{ inputs.CMD_SUFFIX }}" --app "$APP" || true
+          [ -n "${{ inputs.GDRIVE_ID }}" ]           && heroku config:set GDRIVE_ID="${{ inputs.GDRIVE_ID }}" --app "$APP" || true
+          [ -n "${{ inputs.INDEX_URL }}" ]           && heroku config:set INDEX_URL="${{ inputs.INDEX_URL }}" --app "$APP" || true
+          [ -n "${{ inputs.RCLONE_PATH }}" ]         && heroku config:set RCLONE_PATH="${{ inputs.RCLONE_PATH }}" --app "$APP" || true
+          [ -n "${{ inputs.LEECH_DUMP_CHAT }}" ]     && heroku config:set LEECH_DUMP_CHAT="${{ inputs.LEECH_DUMP_CHAT }}" --app "$APP" || true
+          [ -n "${{ inputs.FILELION_API }}" ]        && heroku config:set FILELION_API="${{ inputs.FILELION_API }}" --app "$APP" || true
+          [ -n "${{ inputs.STREAMWISH_API }}" ]      && heroku config:set STREAMWISH_API="${{ inputs.STREAMWISH_API }}" --app "$APP" || true
 
       - name: Login to Heroku Container Registry
         run: heroku container:login
