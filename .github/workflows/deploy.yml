@@ -1,0 +1,151 @@
+name: Deploy NUWA-MLTB to Heroku
+
+on:
+  workflow_dispatch:
+    inputs:
+
+      # ── Heroku ──────────────────────────────────────────────────────────────
+      HEROKU_APP_NAME:
+        description: "Heroku App name (must already exist or will be created)"
+        required: true
+      HEROKU_API_KEY:
+        description: "Heroku API key (Dashboard → Account → API Key)"
+        required: true
+      HEROKU_EMAIL:
+        description: "Heroku account email"
+        required: true
+      HEROKU_TEAM_NAME:
+        description: "Heroku Team name (leave blank if not using a team)"
+        required: false
+
+      # ── Required Bot Config ──────────────────────────────────────────────────
+      BOT_TOKEN:
+        description: "Telegram Bot Token (@BotFather)"
+        required: true
+      OWNER_ID:
+        description: "Your Telegram user ID"
+        required: true
+      TELEGRAM_API:
+        description: "Telegram API ID (my.telegram.org)"
+        required: true
+      TELEGRAM_HASH:
+        description: "Telegram API Hash (my.telegram.org)"
+        required: true
+      DATABASE_URL:
+        description: "MongoDB URI (mongodb+srv://...)"
+        required: true
+      BASE_URL:
+        description: "App URL e.g. https://your-app-name.herokuapp.com"
+        required: false
+      BASE_URL_PORT:
+        description: "Port for web server (default: 80)"
+        required: false
+        default: "80"
+
+      # ── Upstream ─────────────────────────────────────────────────────────────
+      UPSTREAM_REPO:
+        description: "Upstream repo URL (leave default to use this repo)"
+        required: false
+        default: "https://github.com/shubhamdubey18/NUWA-MLTB"
+      UPSTREAM_BRANCH:
+        description: "Upstream branch"
+        required: false
+        default: "master"
+
+      # ── Optional Bot Config ──────────────────────────────────────────────────
+      AUTHORIZED_CHATS:
+        description: "Authorized chat IDs (space-separated)"
+        required: false
+      SUDO_USERS:
+        description: "Sudo user IDs (space-separated)"
+        required: false
+      USER_SESSION_STRING:
+        description: "Pyrogram user session string"
+        required: false
+      CMD_SUFFIX:
+        description: "Command suffix"
+        required: false
+      DEFAULT_UPLOAD:
+        description: "Default upload destination: rc (Rclone) or gd (Google Drive)"
+        required: false
+        default: "rc"
+
+      # ── Google Drive ─────────────────────────────────────────────────────────
+      GDRIVE_ID:
+        description: "Google Drive folder/TD ID"
+        required: false
+      INDEX_URL:
+        description: "Google Drive index URL"
+        required: false
+
+      # ── Rclone ───────────────────────────────────────────────────────────────
+      RCLONE_PATH:
+        description: "Rclone remote path"
+        required: false
+
+      # ── Leech ────────────────────────────────────────────────────────────────
+      LEECH_SPLIT_SIZE:
+        description: "Leech split size in bytes (0 = auto)"
+        required: false
+        default: "0"
+      LEECH_DUMP_CHAT:
+        description: "Leech dump chat ID"
+        required: false
+
+      # ── Misc ─────────────────────────────────────────────────────────────────
+      FILELION_API:
+        description: "FileLion API key"
+        required: false
+      STREAMWISH_API:
+        description: "StreamWish API key"
+        required: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Remove deployment-only files
+        run: |
+          for file in README.md nuwa_hk_deploy.ipynb; do
+            [ -f "$file" ] && echo "Removing $file" && rm -f "$file" || echo "Skipping $file (not found)"
+          done
+
+      - name: Install Heroku CLI
+        run: curl https://cli-assets.heroku.com/install.sh | sh
+
+      - name: Deploy to Heroku (Docker)
+        uses: akhileshns/heroku-deploy@v3.13.15
+        with:
+          heroku_api_key: ${{ inputs.HEROKU_API_KEY }}
+          heroku_app_name: ${{ inputs.HEROKU_APP_NAME }}
+          heroku_email: ${{ inputs.HEROKU_EMAIL }}
+          team: ${{ inputs.HEROKU_TEAM_NAME != '' && format('{0}', inputs.HEROKU_TEAM_NAME) || '' }}
+          usedocker: true
+          docker_heroku_process_type: web
+          stack: "container"
+        env:
+          HD_BOT_TOKEN: ${{ inputs.BOT_TOKEN }}
+          HD_OWNER_ID: ${{ inputs.OWNER_ID }}
+          HD_TELEGRAM_API: ${{ inputs.TELEGRAM_API }}
+          HD_TELEGRAM_HASH: ${{ inputs.TELEGRAM_HASH }}
+          HD_DATABASE_URL: ${{ inputs.DATABASE_URL }}
+          HD_BASE_URL: ${{ inputs.BASE_URL }}
+          HD_BASE_URL_PORT: ${{ inputs.BASE_URL_PORT }}
+          HD_UPSTREAM_REPO: ${{ inputs.UPSTREAM_REPO }}
+          HD_UPSTREAM_BRANCH: ${{ inputs.UPSTREAM_BRANCH }}
+          HD_AUTHORIZED_CHATS: ${{ inputs.AUTHORIZED_CHATS }}
+          HD_SUDO_USERS: ${{ inputs.SUDO_USERS }}
+          HD_USER_SESSION_STRING: ${{ inputs.USER_SESSION_STRING }}
+          HD_CMD_SUFFIX: ${{ inputs.CMD_SUFFIX }}
+          HD_DEFAULT_UPLOAD: ${{ inputs.DEFAULT_UPLOAD }}
+          HD_GDRIVE_ID: ${{ inputs.GDRIVE_ID }}
+          HD_INDEX_URL: ${{ inputs.INDEX_URL }}
+          HD_RCLONE_PATH: ${{ inputs.RCLONE_PATH }}
+          HD_LEECH_SPLIT_SIZE: ${{ inputs.LEECH_SPLIT_SIZE }}
+          HD_LEECH_DUMP_CHAT: ${{ inputs.LEECH_DUMP_CHAT }}
+          HD_FILELION_API: ${{ inputs.FILELION_API }}
+          HD_STREAMWISH_API: ${{ inputs.STREAMWISH_API }}
