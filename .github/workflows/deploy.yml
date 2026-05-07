@@ -144,32 +144,44 @@ jobs:
           heroku stack:set container --app "$APP"
 
       - name: Set Config Vars
+        env:
+          V_BOT_TOKEN: ${{ inputs.BOT_TOKEN }}
+          V_OWNER_ID: ${{ inputs.OWNER_ID }}
+          V_TELEGRAM_API: ${{ inputs.TELEGRAM_API }}
+          V_TELEGRAM_HASH: ${{ inputs.TELEGRAM_HASH }}
+          V_DATABASE_URL: ${{ inputs.DATABASE_URL }}
+          V_BASE_URL: ${{ inputs.BASE_URL }}
+          V_BASE_URL_PORT: ${{ inputs.BASE_URL_PORT }}
+          V_UPSTREAM_REPO: ${{ inputs.UPSTREAM_REPO }}
+          V_UPSTREAM_BRANCH: ${{ inputs.UPSTREAM_BRANCH }}
+          V_DEFAULT_UPLOAD: ${{ inputs.DEFAULT_UPLOAD }}
+          V_LEECH_SPLIT_SIZE: ${{ inputs.LEECH_SPLIT_SIZE }}
+          V_AUTHORIZED_CHATS: ${{ inputs.AUTHORIZED_CHATS }}
+          V_SUDO_USERS: ${{ inputs.SUDO_USERS }}
+          V_USER_SESSION_STRING: ${{ inputs.USER_SESSION_STRING }}
+          V_CMD_SUFFIX: ${{ inputs.CMD_SUFFIX }}
+          V_GDRIVE_ID: ${{ inputs.GDRIVE_ID }}
+          V_INDEX_URL: ${{ inputs.INDEX_URL }}
+          V_RCLONE_PATH: ${{ inputs.RCLONE_PATH }}
+          V_LEECH_DUMP_CHAT: ${{ inputs.LEECH_DUMP_CHAT }}
+          V_FILELION_API: ${{ inputs.FILELION_API }}
+          V_STREAMWISH_API: ${{ inputs.STREAMWISH_API }}
         run: |
-          APP="${{ inputs.HEROKU_APP_NAME }}"
-          heroku config:set \
-            BOT_TOKEN="${{ inputs.BOT_TOKEN }}" \
-            OWNER_ID="${{ inputs.OWNER_ID }}" \
-            TELEGRAM_API="${{ inputs.TELEGRAM_API }}" \
-            TELEGRAM_HASH="${{ inputs.TELEGRAM_HASH }}" \
-            DATABASE_URL="${{ inputs.DATABASE_URL }}" \
-            BASE_URL="${{ inputs.BASE_URL }}" \
-            BASE_URL_PORT="${{ inputs.BASE_URL_PORT }}" \
-            UPSTREAM_REPO="${{ inputs.UPSTREAM_REPO }}" \
-            UPSTREAM_BRANCH="${{ inputs.UPSTREAM_BRANCH }}" \
-            DEFAULT_UPLOAD="${{ inputs.DEFAULT_UPLOAD }}" \
-            LEECH_SPLIT_SIZE="${{ inputs.LEECH_SPLIT_SIZE }}" \
-            --app "$APP"
-          # set optional vars only if provided
-          [ -n "${{ inputs.AUTHORIZED_CHATS }}" ]    && heroku config:set AUTHORIZED_CHATS="${{ inputs.AUTHORIZED_CHATS }}" --app "$APP" || true
-          [ -n "${{ inputs.SUDO_USERS }}" ]          && heroku config:set SUDO_USERS="${{ inputs.SUDO_USERS }}" --app "$APP" || true
-          [ -n "${{ inputs.USER_SESSION_STRING }}" ] && heroku config:set USER_SESSION_STRING="${{ inputs.USER_SESSION_STRING }}" --app "$APP" || true
-          [ -n "${{ inputs.CMD_SUFFIX }}" ]          && heroku config:set CMD_SUFFIX="${{ inputs.CMD_SUFFIX }}" --app "$APP" || true
-          [ -n "${{ inputs.GDRIVE_ID }}" ]           && heroku config:set GDRIVE_ID="${{ inputs.GDRIVE_ID }}" --app "$APP" || true
-          [ -n "${{ inputs.INDEX_URL }}" ]           && heroku config:set INDEX_URL="${{ inputs.INDEX_URL }}" --app "$APP" || true
-          [ -n "${{ inputs.RCLONE_PATH }}" ]         && heroku config:set RCLONE_PATH="${{ inputs.RCLONE_PATH }}" --app "$APP" || true
-          [ -n "${{ inputs.LEECH_DUMP_CHAT }}" ]     && heroku config:set LEECH_DUMP_CHAT="${{ inputs.LEECH_DUMP_CHAT }}" --app "$APP" || true
-          [ -n "${{ inputs.FILELION_API }}" ]        && heroku config:set FILELION_API="${{ inputs.FILELION_API }}" --app "$APP" || true
-          [ -n "${{ inputs.STREAMWISH_API }}" ]      && heroku config:set STREAMWISH_API="${{ inputs.STREAMWISH_API }}" --app "$APP" || true
+          python3 - << 'EOF'
+          import subprocess, os, sys
+          app = "${{ inputs.HEROKU_APP_NAME }}"
+          config_args = [
+              f"{k[2:]}={v}"
+              for k, v in os.environ.items()
+              if k.startswith("V_") and v.strip()
+          ]
+          if not config_args:
+              print("No config vars to set"); sys.exit(0)
+          result = subprocess.run(
+              ["heroku", "config:set", "--app", app] + config_args
+          )
+          sys.exit(result.returncode)
+          EOF
 
       - name: Login to Heroku Container Registry
         run: heroku container:login
