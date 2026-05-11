@@ -1,15 +1,15 @@
-FROM 5hojib/aeon:latest
+FROM arakurumi/mltb:latest
 
 WORKDIR /app
 RUN chmod 777 /app
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc g++ python3-dev libxml2-dev libxslt-dev libffi-dev libssl-dev \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache \
+    gcc g++ python3-dev libxml2-dev libxslt-dev libffi-dev openssl-dev musl-dev
 
-RUN uv venv
+RUN python3 -m venv .venv
 COPY requirements.txt .
-RUN uv pip install --no-cache-dir -r requirements.txt
+RUN .venv/bin/pip install --no-cache-dir --upgrade pip && \
+    .venv/bin/pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
